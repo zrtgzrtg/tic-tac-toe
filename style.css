@@ -1,0 +1,33 @@
+
+body {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 8fr 2fr;
+}
+.container {
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: 30vw;
+    height: 30vw;
+    justify-self: center;
+
+}
+.container > div {
+    border-collapse: collapse;
+    border: 1px solid black;
+    height: 10vw;
+    width: 10vw;
+    aspect-ratio: 1 /1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.container > div > img {
+    aspect-ratio: 1 / 1;
+    height: 8vw;
+    width: 8vw;
+}
+.container > div:hover {
+    background-color: lightgrey;
+}
