@@ -4,11 +4,22 @@ const game = (function() {
     let gameboard;
     const containerHtml = document.querySelector(".container")
     let playerXturn = true
-
+    const restartButtonDiv = document.querySelector(".restart-buttons")
+    let playerXname = null
+    let playerOname = null
+    let playerXScore = 0
+    let playerOScore = 0
+    const formDivPlayerX = document.querySelector(".player1")
+    const formDivPlayerO = document.querySelector(".player2")
+    console.log(formDivPlayerX)
     function init() {
+        bindListener()
+        console.log(restartButtonDiv)
+    }
+    function initGameboard() {
         gameboard = Array(9).fill().map(() => new squareState())
         genDOM()
-        bindListener()
+        bindListenerGameboard()
     }
     function getGameboard(){
         return gameboard
@@ -71,7 +82,7 @@ const game = (function() {
             children[eventid].appendChild(res) 
             }
         }
-    function bindListener() {
+    function bindListenerGameboard() {
         
         containerHtml.addEventListener("click",(event) => {
             let playerSymbol = playerXturn ? "x" : "o"
@@ -79,6 +90,40 @@ const game = (function() {
             updateDOM(playerXturn, event.target.id)
             playerXturn = !playerXturn
         })
+            }
+    function bindListener(){
+        restartButtonDiv.addEventListener("click", (event)=> {
+            if(event.target.id==="start-button"){
+                initGameboard()
+            } else {
+                initGameboard()
+            }
+        })
+        formDivPlayerX.addEventListener("submit", (event)=> {
+            event.preventDefault()
+            const form = event.target
+            const formData = new FormData(form)
+            let eventInput = event.target.elements["player1Name"]
+
+            if(playerXname===null) {
+            playerXname = formData.get("player1Name")
+            }
+            eventInput.value = ""
+            console.log(playerXname)
+        }) 
+        formDivPlayerO.addEventListener("submit", (event)=> {
+            event.preventDefault()
+            const form = event.target
+            const formData = new FormData(form)
+            let eventInput = event.target.elements["player2Name"]
+
+            if(playerOname===null){
+            playerOname = formData.get("player2Name")
+            }
+            eventInput.value = ""
+            console.log(playerOname)
+        })
+
     }
     return {
         init,
