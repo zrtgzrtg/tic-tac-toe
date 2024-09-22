@@ -1,25 +1,40 @@
 
 const game = (function() {
 
-    let gameboard;
-    const containerHtml = document.querySelector(".container")
-    let playerXturn = true
-    const restartButtonDiv = document.querySelector(".restart-buttons")
-    let playerXname = null
-    let playerOname = null
-    let playerXScore = 0
-    let playerOScore = 0
+    let gameboard        = null;
+    let containerHtml    = null;    
+    let restartButtonDiv = null; 
+    let playerXturn      = null;
+    let playerXname      = null;
+    let playerOname      = null;
+    let playerXScore     = null;
+    let playerOScore     = null;
     const formDivPlayerX = document.querySelector(".player1")
     const formDivPlayerO = document.querySelector(".player2")
+    const scoreDiv = document.querySelector(".score-div")
+    const playerWonDiv = document.querySelector(".player-won")
     console.log(formDivPlayerX)
     function init() {
+        containerHtml    = document.querySelector(".container")
+        restartButtonDiv = document.querySelector(".restart-buttons")    
         bindListener()
-        console.log(restartButtonDiv)
+        bindListenerGameboard()
     }
     function initGameboard() {
         gameboard = Array(9).fill().map(() => new squareState())
+        playerXturn = true
+        playerXname = "X-player"
+        playerOname = "O-player"
+        playerXScore = 0
+        playerOScore = 0         
+        delDOM()
         genDOM()
-        bindListenerGameboard()
+    }
+    function softInitGameboard() {
+        gameboard = Array(9).fill().map(() => new squareState())
+        playerXturn = true
+        delDOM()
+        genDOM()
     }
     function getGameboard(){
         return gameboard
@@ -38,13 +53,26 @@ const game = (function() {
         for(let i = 0; i<winOptions.length;i++){
             let res = evalWinOption(winOptions[i],playerSymbol)
             if(res === true) {
-                console.log("Game Finished. Player with Symbol: " + playerSymbol + " won!!")
+                if(playerSymbol==="x") {
+                    playerXScore++
+                    console.log(playerXScore)
+                    containerHtml.removeEventListener("click",bindListenerGameboardFunction)
+                    updateWonPlayer("Player with Symbol: " + playerXname + " won!!")
+                } else if(playerSymbol==="o") {
+                    playerOScore++
+                    console.log(playerOScore)
+                    containerHtml.removeEventListener("click",bindListenerGameboardFunction)
+                    updateWonPlayer("Player with Symbol: " + playerOname + " won!!")
+                }
                 return
             }
         }
             if(checkTie()){
-                console.log("Game Finished. No more Squares available!")
-            }
+                updateWonPlayer("Tie!! No more Squares available!")
+                playerXScore = playerXScore + 0.5
+                playerOScore = playerOScore + 0.5
+                containerHtml.removeEventListener("click",bindListenerGameboardFunction)
+            } 
     }
     function evalWinOption(arr3val,playerSymbol) {
         if(gameboard[arr3val[0]].getState()===gameboard[arr3val[1]].getState()){
@@ -72,6 +100,11 @@ const game = (function() {
     
         }
     }
+function delDOM() {
+while(containerHtml.firstChild) {
+    containerHtml.removeChild(containerHtml.firstChild)
+}
+}
     function updateDOM(playerXturn, eventid) {
         const children = containerHtml.children
         let svgString = playerXturn ? "svg/x.svg" : "svg/circle.svg"
@@ -81,22 +114,29 @@ const game = (function() {
             if(res !== null) {
             children[eventid].appendChild(res) 
             }
+            updateScore()
         }
     function bindListenerGameboard() {
-        
-        containerHtml.addEventListener("click",(event) => {
+        containerHtml.addEventListener("click",bindListenerGameboardFunction)
+        }
+    function bindListenerGameboardFunction(event){
             let playerSymbol = playerXturn ? "x" : "o"
             changeSquare(event.target.id, playerSymbol)
             updateDOM(playerXturn, event.target.id)
             playerXturn = !playerXturn
-        })
-            }
+}
+            
     function bindListener(){
         restartButtonDiv.addEventListener("click", (event)=> {
             if(event.target.id==="start-button"){
                 initGameboard()
+                bindListenerGameboard()
+                resetScoreboard()
             } else {
-                initGameboard()
+                (playerOScore===null&&playerXScore===null) ? initGameboard() : softInitGameboard()
+                bindListenerGameboard()
+                resetScoreboardTextOnly()
+                console.log("reached")
             }
         })
         formDivPlayerX.addEventListener("submit", (event)=> {
@@ -105,7 +145,7 @@ const game = (function() {
             const formData = new FormData(form)
             let eventInput = event.target.elements["player1Name"]
 
-            if(playerXname===null) {
+            if(playerXname==="X-player") {
             playerXname = formData.get("player1Name")
             }
             eventInput.value = ""
@@ -117,13 +157,25 @@ const game = (function() {
             const formData = new FormData(form)
             let eventInput = event.target.elements["player2Name"]
 
-            if(playerOname===null){
+            if(playerOname==="O-player"){
             playerOname = formData.get("player2Name")
             }
             eventInput.value = ""
             console.log(playerOname)
         })
-
+    }
+    function updateScore() {
+        scoreDiv.textContent = `${playerXScore} : ${playerOScore}`
+    }
+    function updateWonPlayer(text) {
+        playerWonDiv.textContent = text
+    }
+    function resetScoreboard() {
+        scoreDiv.textContent = "0 : 0"
+        playerWonDiv.textContent = ""
+    }
+    function resetScoreboardTextOnly() {
+        playerWonDiv.textContent = ""
     }
     return {
         init,
